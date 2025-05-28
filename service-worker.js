@@ -1,13 +1,15 @@
-const CACHE_NAME = 'self-editing-pwa-v1';
+const CACHE_NAME = 'self-editing-pwa-v2';
 const ASSETS_TO_CACHE = [
     '.',
     'index.html',
     'manifest.json',
     'assets/css/style.css',
     'assets/js/app.js',
-    'assets/js/editor.js',
     'assets/icons/icon-192.png',
-    'assets/icons/icon-512.png'
+    'assets/icons/icon-512.png',
+    'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs/loader.min.js',
+    'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs/editor/editor.main.js',
+    'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs/editor/editor.main.css'
 ];
 
 self.addEventListener('install', (event) => {

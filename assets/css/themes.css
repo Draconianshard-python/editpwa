@@ -1,0 +1,75 @@
+/* VS Code Dark Theme */
+.theme-vscode {
+    --background-color: #1e1e1e;
+    --text-color: #d4d4d4;
+    --text-secondary: #858585;
+    --border-color: #474747;
+    --menu-background: #3c3c3c;
+    --menu-hover-background: #505050;
+    --activity-bar-background: #333333;
+    --activity-bar-hover: #404040;
+    --sidebar-background: #252526;
+    --tab-background: #252526;
+    --tab-active-background: #1e1e1e;
+    --tab-inactive-background: #2d2d2d;
+    --statusbar-background: #007acc;
+    --accent-color: #007acc;
+    --icon-color: #858585;
+}
+
+/* VS Code Light Theme */
+.theme-vscode-light {
+    --background-color: #ffffff;
+    --text-color: #333333;
+    --text-secondary: #6c6c6c;
+    --border-color: #e0e0e0;
+    --menu-background: #f3f3f3;
+    --menu-hover-background: #e8e8e8;
+    --activity-bar-background: #2c2c2c;
+    --activity-bar-hover: #383838;
+    --sidebar-background: #f3f3f3;
+    --tab-background: #f3f3f3;
+    --tab-active-background: #ffffff;
+    --tab-inactive-background: #ececec;
+    --statusbar-background: #007acc;
+    --accent-color: #007acc;
+    --icon-color: #424242;
+}
+
+/* Xcode Dark Theme */
+.theme-xcode {
+    --background-color: #292a30;
+    --text-color: #dfdfe0;
+    --text-secondary: #7f8c98;
+    --border-color: #494949;
+    --menu-background: #333333;
+    --menu-hover-background: #404040;
+    --activity-bar-background: #1f1f24;
+    --activity-bar-hover: #2a2a30;
+    --sidebar-background: #1f1f24;
+    --tab-background: #1f1f24;
+    --tab-active-background: #292a30;
+    --tab-inactive-background: #252529;
+    --statusbar-background: #1f1f24;
+    --accent-color: #fc6a5d;
+    --icon-color: #7f8c98;
+}
+
+/* Xcode Light Theme */
+.theme-xcode-light {
+    --background-color: #ffffff;
+    --text-color: #262626;
+    --text-secondary: #777777;
+    --border-color: #e5e5e5;
+    --menu-background: #f5f5f5;
+    --menu-hover-background: #e8e8e8;
+    --activity-bar-background: #ebedef;
+    --activity-bar-hover: #dfe1e3;
+    --sidebar-background: #ebedef;
+    --tab-background: #ebedef;
+    --tab-active-background: #ffffff;
+    --tab-inactive-background: #f5f5f5;
+    --statusbar-background: #ebedef;
+    --accent-color: #007aff;
+    --icon-color: #4d4d4d;
+}

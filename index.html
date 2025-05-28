@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="Self-editing Progressive Web App">
+    <meta name="theme-color" content="#000000">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <title>Self-Editing PWA</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <div id="app">
+        <header>
+            <h1 id="title" contenteditable="false">Self-Editing PWA</h1>
+            <div id="user-info">
+                <span>User: </span>
+                <span id="username">Draconianshard-python</span>
+            </div>
+            <div id="utc-time"></div>
+        </header>
+
+        <main>
+            <div id="content" contenteditable="false">
+                Welcome to the self-editing PWA! Click the edit button to make changes.
+            </div>
+        </main>
+
+        <footer>
+            <button id="editButton">Edit Content</button>
+            <button id="saveButton" style="display: none;">Save Changes</button>
+            <div id="lastModified"></div>
+            <button id="installButton" style="display: none;">Install App</button>
+        </footer>
+    </div>
+
+    <script src="assets/js/app.js"></script>
+    <script src="assets/js/editor.js"></script>
+</body>
+</html>

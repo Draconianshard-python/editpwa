@@ -1,10 +1,10 @@
 {
     "name": "Self-Editing PWA",
     "short_name": "EditPWA",
-    "description": "A self-editing Progressive Web App",
+    "description": "A self-editing Progressive Web App with Monaco Editor",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#ffffff",
+    "background_color": "#1e1e1e",
     "theme_color": "#000000",
     "orientation": "any",
     "icons": [

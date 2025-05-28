@@ -12,73 +12,238 @@
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
     <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/themes.css">
+    <link rel="stylesheet" href="assets/css/menus.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs/loader.min.js"></script>
 </head>
-<body>
+<body class="theme-vscode">
     <div id="app">
-        <header>
-            <div id="top-bar">
-                <div id="user-info">
-                    <span>User: </span>
-                    <span id="username">Draconianshard-python</span>
-                </div>
-                <div id="utc-time"></div>
+        <!-- Menu Bar -->
+        <div class="menu-bar">
+            <div class="app-icon">
+                <img src="assets/icons/icon-192.png" alt="App Icon" height="16">
             </div>
-            
-            <nav id="action-bar">
-                <button id="newFileBtn">New File</button>
-                <button id="saveButton" disabled>Save</button>
-                <button id="runButton" disabled>Run File</button>
-                <button id="installButton" style="display: none;">Install App</button>
-            </nav>
-        </header>
+            <div class="menu-items">
+                <div class="menu-item" data-menu="file">File</div>
+                <div class="menu-item" data-menu="edit">Edit</div>
+                <div class="menu-item" data-menu="view">View</div>
+                <div class="menu-item" data-menu="go">Go</div>
+                <div class="menu-item" data-menu="run">Run</div>
+                <div class="menu-item" data-menu="terminal">Terminal</div>
+                <div class="menu-item" data-menu="help">Help</div>
+            </div>
+            <div class="window-controls">
+                <div id="themeSwitcher" class="theme-switch">
+                    <span class="current-theme">VS Code</span>
+                    <span class="theme-icon">🎨</span>
+                </div>
+            </div>
+        </div>
 
-        <main>
-            <div id="file-explorer">
-                <div class="file-tree">
-                    <h3>Project Files</h3>
-                    <ul id="file-list"></ul>
+        <!-- Activity Bar -->
+        <div class="activity-bar">
+            <div class="activity-item active" data-view="explorer" title="Explorer">
+                <span class="codicon">📁</span>
+            </div>
+            <div class="activity-item" data-view="search" title="Search">
+                <span class="codicon">🔍</span>
+            </div>
+            <div class="activity-item" data-view="git" title="Source Control">
+                <span class="codicon">📦</span>
+            </div>
+            <div class="activity-item" data-view="debug" title="Run and Debug">
+                <span class="codicon">🐞</span>
+            </div>
+            <div class="activity-item" data-view="extensions" title="Extensions">
+                <span class="codicon">🧩</span>
+            </div>
+            <div class="activity-bottom">
+                <div class="activity-item" data-view="settings" title="Settings">
+                    <span class="codicon">⚙️</span>
                 </div>
             </div>
-            <div id="editor-container">
-                <div id="monaco-editor"></div>
-                <div id="output-container" style="display: none;">
-                    <div class="output-header">
-                        <span>Output</span>
-                        <button id="closeOutput">×</button>
+        </div>
+
+        <!-- Main Content -->
+        <div class="workspace">
+            <!-- Side Panel -->
+            <div class="side-panel">
+                <div class="panel-view active" data-view="explorer">
+                    <div class="panel-header">
+                        <h3>EXPLORER</h3>
+                        <div class="panel-actions">
+                            <button id="newFileBtn" title="New File">📄</button>
+                            <button id="refreshBtn" title="Refresh">🔄</button>
+                            <button id="collapseBtn" title="Collapse">📎</button>
+                        </div>
                     </div>
-                    <div id="output-content"></div>
+                    <div id="file-explorer">
+                        <div class="file-tree">
+                            <ul id="file-list"></ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Search View -->
+                <div class="panel-view" data-view="search">
+                    <div class="panel-header">
+                        <h3>SEARCH</h3>
+                    </div>
+                    <div class="search-container">
+                        <input type="text" id="searchInput" placeholder="Search in files...">
+                        <div class="search-results" id="searchResults"></div>
+                    </div>
+                </div>
+
+                <!-- Settings View -->
+                <div class="panel-view" data-view="settings">
+                    <div class="panel-header">
+                        <h3>SETTINGS</h3>
+                    </div>
+                    <div class="settings-container">
+                        <div class="settings-search">
+                            <input type="text" placeholder="Search settings...">
+                        </div>
+                        <div class="settings-groups">
+                            <!-- Editor Settings -->
+                            <div class="settings-group">
+                                <h4>Editor</h4>
+                                <div class="setting-item">
+                                    <label>Font Size</label>
+                                    <input type="number" id="setting-fontSize" value="14">
+                                </div>
+                                <div class="setting-item">
+                                    <label>Tab Size</label>
+                                    <input type="number" id="setting-tabSize" value="4">
+                                </div>
+                                <div class="setting-item">
+                                    <label>Word Wrap</label>
+                                    <select id="setting-wordWrap">
+                                        <option value="off">Off</option>
+                                        <option value="on">On</option>
+                                        <option value="wordWrapColumn">Bounded</option>
+                                    </select>
+                                </div>
+                                <div class="setting-item">
+                                    <label>Minimap</label>
+                                    <input type="checkbox" id="setting-minimap" checked>
+                                </div>
+                            </div>
+                            
+                            <!-- Theme Settings -->
+                            <div class="settings-group">
+                                <h4>Theme</h4>
+                                <div class="setting-item">
+                                    <label>Color Theme</label>
+                                    <select id="setting-theme">
+                                        <option value="vs-dark">VS Code Dark</option>
+                                        <option value="vs-light">VS Code Light</option>
+                                        <option value="xcode-dark">Xcode Dark</option>
+                                        <option value="xcode-light">Xcode Light</option>
+                                    </select>
+                                </div>
+                                <div class="setting-item">
+                                    <label>Icon Theme</label>
+                                    <select id="setting-iconTheme">
+                                        <option value="vscode">VS Code</option>
+                                        <option value="xcode">Xcode</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <!-- Terminal Settings -->
+                            <div class="settings-group">
+                                <h4>Terminal</h4>
+                                <div class="setting-item">
+                                    <label>Integrated Terminal</label>
+                                    <input type="checkbox" id="setting-terminal" checked>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </main>
 
-        <footer>
-            <div id="status-bar">
+            <!-- Editor Area -->
+            <div class="editor-area">
+                <!-- Tabs -->
+                <div class="editor-tabs">
+                    <div id="openedTabs"></div>
+                    <div class="tab-actions">
+                        <button id="splitEditorBtn" title="Split Editor">◫</button>
+                    </div>
+                </div>
+
+                <!-- Editor Container -->
+                <div class="editor-container">
+                    <div id="monaco-editor"></div>
+                    <div id="output-container" class="hidden">
+                        <div class="output-header">
+                            <span>Output</span>
+                            <button id="closeOutput">×</button>
+                        </div>
+                        <div id="output-content"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status Bar -->
+        <footer class="status-bar">
+            <div class="status-left">
                 <span id="current-file"></span>
+                <span class="status-item" id="cursor-position">Ln 1, Col 1</span>
+            </div>
+            <div class="status-center">
                 <span id="lastModified"></span>
+            </div>
+            <div class="status-right">
+                <span class="status-item" id="encoding">UTF-8</span>
+                <span class="status-item" id="language-mode">plaintext</span>
+                <span class="status-item" id="utc-time"></span>
+                <span class="status-item" id="username">Draconianshard-python</span>
             </div>
         </footer>
     </div>
 
-    <!-- New File Dialog -->
-    <div id="newFileDialog" class="dialog" style="display: none;">
-        <div class="dialog-content">
+    <!-- Modals -->
+    <div id="commandPalette" class="modal hidden">
+        <div class="modal-content">
+            <input type="text" placeholder="Type a command or search...">
+            <div class="command-list"></div>
+        </div>
+    </div>
+
+    <div id="newFileDialog" class="modal hidden">
+        <div class="modal-content">
             <h3>Create New File</h3>
-            <input type="text" id="newFileName" placeholder="Enter file name (e.g., script.js)">
+            <input type="text" id="newFileName" placeholder="Enter file name">
             <select id="fileTemplate">
                 <option value="">Empty File</option>
                 <option value="html">HTML Template</option>
                 <option value="js">JavaScript Template</option>
                 <option value="css">CSS Template</option>
             </select>
-            <div class="dialog-buttons">
+            <div class="modal-buttons">
                 <button id="createFileBtn">Create</button>
                 <button id="cancelFileBtn">Cancel</button>
             </div>
         </div>
     </div>
 
+    <!-- Context Menus -->
+    <div id="fileContextMenu" class="context-menu hidden">
+        <div class="menu-item" data-action="open">Open</div>
+        <div class="menu-item" data-action="rename">Rename</div>
+        <div class="menu-item" data-action="delete">Delete</div>
+        <div class="menu-separator"></div>
+        <div class="menu-item" data-action="copyPath">Copy Path</div>
+    </div>
+
+    <!-- Scripts -->
     <script src="assets/js/fileTemplates.js"></script>
+    <script src="assets/js/menus.js" type="module"></script>
+    <script src="assets/js/settings.js" type="module"></script>
     <script src="assets/js/app.js" type="module"></script>
 </body>
 </html>

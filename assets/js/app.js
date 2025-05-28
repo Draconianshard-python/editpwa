@@ -1,14 +1,11 @@
-// Monaco Editor configuration
-require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs' }});
-
 class PWAApp {
     constructor() {
         this.editor = null;
         this.currentFile = null;
         this.files = new Map();
         this.originalContent = new Map();
+        this.outputVisible = false;
         
-        // Initialize the application
         this.initializeApp();
     }
 
@@ -23,6 +20,7 @@ class PWAApp {
 
     async setupMonacoEditor() {
         return new Promise((resolve) => {
+            require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs' }});
             require(['vs/editor/editor.main'], () => {
                 this.editor = monaco.editor.create(document.getElementById('monaco-editor'), {
                     theme: 'vs-dark',
@@ -30,11 +28,8 @@ class PWAApp {
                     minimap: { enabled: true },
                     automaticLayout: true,
                     scrollBeyondLastLine: false,
-                    renderWhitespace: 'boundary',
-                    rulers: [80, 120],
                 });
                 
-                // Setup file change detection
                 this.editor.onDidChangeModelContent(() => {
                     if (this.currentFile) {
                         const hasChanges = this.editor.getValue() !== this.originalContent.get(this.currentFile);
@@ -61,69 +56,126 @@ class PWAApp {
     }
 
     setupEventListeners() {
+        // File management
+        document.getElementById('newFileBtn').addEventListener('click', () => this.showNewFileDialog());
         document.getElementById('saveButton').addEventListener('click', () => this.saveCurrentFile());
-        document.getElementById('file-selector').addEventListener('change', (e) => this.loadFile(e.target.value));
-    }
+        document.getElementById('runButton').addEventListener('click', () => this.runCurrentFile());
+        
+        // Dialog events
+        document.getElementById('createFileBtn').addEventListener('click', () => this.createNewFile());
+        document.getElementById('cancelFileBtn').addEventListener('click', () => this.hideNewFileDialog());
+        document.getElementById('closeOutput').addEventListener('click', () => this.toggleOutput(false));
 
-    async loadFileList() {
-        const defaultFiles = [
-            { name: 'index.html', path: 'index.html' },
-            { name: 'style.css', path: 'assets/css/style.css' },
-            { name: 'app.js', path: 'assets/js/app.js' },
-            { name: 'manifest.json', path: 'manifest.json' },
-            { name: 'service-worker.js', path: 'service-worker.js' }
-        ];
-
-        const fileList = document.getElementById('file-list');
-        const fileSelector = document.getElementById('file-selector');
-
-        // Load files from localStorage or use defaults
-        const savedFiles = localStorage.getItem('pwa-files');
-        const files = savedFiles ? JSON.parse(savedFiles) : defaultFiles;
-
-        // Clear existing options
-        fileList.innerHTML = '';
-        fileSelector.innerHTML = '<option value="">Select a file to edit...</option>';
-
-        // Add files to UI
-        files.forEach(file => {
-            // Add to file list
-            const li = document.createElement('li');
-            li.className = 'file-item';
-            li.textContent = file.name;
-            li.addEventListener('click', () => this.loadFile(file.path));
-            fileList.appendChild(li);
-
-            // Add to selector
-            const option = document.createElement('option');
-            option.value = file.path;
-            option.textContent = file.path;
-            fileSelector.appendChild(option);
-
-            // Load file content
-            this.loadFileContent(file.path);
+        // File type selection
+        document.getElementById('fileTemplate').addEventListener('change', (e) => {
+            const template = e.target.value;
+            if (template && window.fileTemplates[template]) {
+                document.getElementById('newFileName').value = `new.${template}`;
+            }
         });
     }
 
-    async loadFileContent(filePath) {
-        // Try to load from localStorage first
-        const savedContent = localStorage.getItem(`file:${filePath}`);
-        if (savedContent) {
-            this.files.set(filePath, savedContent);
-            this.originalContent.set(filePath, savedContent);
+    showNewFileDialog() {
+        document.getElementById('newFileDialog').style.display = 'flex';
+        document.getElementById('newFileName').focus();
+    }
+
+    hideNewFileDialog() {
+        document.getElementById('newFileDialog').style.display = 'none';
+        document.getElementById('newFileName').value = '';
+        document.getElementById('fileTemplate').value = '';
+    }
+
+    async createNewFile() {
+        const fileName = document.getElementById('newFileName').value.trim();
+        const template = document.getElementById('fileTemplate').value;
+        
+        if (!fileName) {
+            this.showNotification('Please enter a file name', 'error');
             return;
         }
 
-        // If not in localStorage, load default content
-        try {
-            const response = await fetch(filePath);
-            const content = await response.text();
-            this.files.set(filePath, content);
-            this.originalContent.set(filePath, content);
-            localStorage.setItem(`file:${filePath}`, content);
-        } catch (error) {
-            console.error(`Error loading file ${filePath}:`, error);
+        let content = '';
+        if (template && window.fileTemplates[template]) {
+            content = window.fileTemplates[template];
         }
+
+        // Save the new file
+        this.files.set(fileName, content);
+        this.originalContent.set(fileName, content);
+        localStorage.setItem(`file:${fileName}`, content);
+        
+        // Update file list
+        await this.loadFileList();
+        
+        // Load the new file in editor
+        this.loadFile(fileName);
+        
+        // Hide dialog
+        this.hideNewFileDialog();
+        this.showNotification(`Created file: ${fileName}`);
+    }
+
+    async loadFileList() {
+        const fileList = document.getElementById('file-list');
+        fileList.innerHTML = '';
+
+        // Get all files from localStorage
+        const files = new Set();
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key.startsWith('file:')) {
+                files.add(key.replace('file:', ''));
+            }
+        }
+
+        // Add default files if no files exist
+        if (files.size === 0) {
+            const defaultFiles = [
+                'index.html',
+                'assets/css/style.css',
+                'assets/js/app.js',
+                'manifest.json',
+                'service-worker.js'
+            ];
+            
+            for (const file of defaultFiles) {
+                try {
+                    const response = await fetch(file);
+                    const content = await response.text();
+                    this.files.set(file, content);
+                    this.originalContent.set(file, content);
+                    localStorage.setItem(`file:${file}`, content);
+                    files.add(file);
+                } catch (error) {
+                    console.error(`Error loading file ${file}:`, error);
+                }
+            }
+        }
+
+        // Create file list items
+        for (const file of files) {
+            const li = document.createElement('li');
+            li.className = 'file-item';
+            li.innerHTML = `
+                <span class="file-icon">${this.getFileIcon(file)}</span>
+                <span class="file-name">${file}</span>
+            `;
+            li.addEventListener('click', () => this.loadFile(file));
+            fileList.appendChild(li);
+        }
+    }
+
+    getFileIcon(filename) {
+        const ext = filename.split('.').pop();
+        const icons = {
+            html: '📄',
+            css: '🎨',
+            js: '📜',
+            json: '⚙️',
+            default: '📝'
+        };
+        return icons[ext] || icons.default;
     }
 
     async loadFile(filePath) {
@@ -133,11 +185,25 @@ class PWAApp {
         
         // Update UI
         document.querySelectorAll('.file-item').forEach(item => {
-            item.classList.toggle('active', item.textContent === filePath);
+            item.classList.toggle('active', 
+                item.querySelector('.file-name').textContent === filePath);
         });
 
         // Get file content
-        let content = this.files.get(filePath) || '';
+        let content = localStorage.getItem(`file:${filePath}`);
+        if (!content) {
+            try {
+                const response = await fetch(filePath);
+                content = await response.text();
+                localStorage.setItem(`file:${filePath}`, content);
+            } catch (error) {
+                console.error(`Error loading file ${filePath}:`, error);
+                content = '';
+            }
+        }
+
+        this.files.set(filePath, content);
+        this.originalContent.set(filePath, content);
         
         // Set language based on file extension
         const extension = filePath.split('.').pop();
@@ -148,10 +214,11 @@ class PWAApp {
         this.editor.setModel(model);
         
         // Update status bar
-        document.getElementById('file-info').textContent = `${filePath} - ${language}`;
-        
-        // Reset save button state
+        document.getElementById('current-file').textContent = filePath;
         document.getElementById('saveButton').disabled = true;
+        
+        // Enable/disable run button for JavaScript files
+        document.getElementById('runButton').disabled = language !== 'javascript';
     }
 
     getLanguageFromExtension(extension) {
@@ -182,18 +249,83 @@ class PWAApp {
         document.getElementById('lastModified').textContent = 
             `Last saved: ${new Date().toLocaleString()}`;
         
-        // Show save notification
         this.showNotification('File saved successfully!');
     }
 
-    showNotification(message) {
+    runCurrentFile() {
+        const content = this.editor.getValue();
+        const outputContainer = document.getElementById('output-container');
+        const outputContent = document.getElementById('output-content');
+        
+        // Show output container
+        this.toggleOutput(true);
+        
+        // Capture console output
+        const log = [];
+        const originalConsole = {
+            log: console.log,
+            error: console.error,
+            warn: console.warn,
+            info: console.info
+        };
+
+        console.log = (...args) => {
+            log.push(['log', ...args]);
+            originalConsole.log(...args);
+        };
+        console.error = (...args) => {
+            log.push(['error', ...args]);
+            originalConsole.error(...args);
+        };
+        console.warn = (...args) => {
+            log.push(['warn', ...args]);
+            originalConsole.warn(...args);
+        };
+        console.info = (...args) => {
+            log.push(['info', ...args]);
+            originalConsole.info(...args);
+        };
+
+        try {
+            // Create a new Function from the content and execute it
+            const func = new Function(content);
+            func();
+            
+            // Display output
+            outputContent.innerHTML = log.map(([type, ...args]) => {
+                const color = {
+                    log: '#fff',
+                    error: '#ff5555',
+                    warn: '#ffb86c',
+                    info: '#8be9fd'
+                }[type];
+                return `<span style="color: ${color}">${args.join(' ')}</span>`;
+            }).join('\n');
+        } catch (error) {
+            outputContent.innerHTML = `<span style="color: #ff5555">Error: ${error.message}</span>`;
+        } finally {
+            // Restore original console
+            Object.assign(console, originalConsole);
+        }
+    }
+
+    toggleOutput(show) {
+        const outputContainer = document.getElementById('output-container');
+        this.outputVisible = show;
+        outputContainer.style.display = show ? 'block' : 'none';
+        if (!show) {
+            document.getElementById('output-content').innerHTML = '';
+        }
+    }
+
+    showNotification(message, type = 'success') {
         const notification = document.createElement('div');
         notification.textContent = message;
         notification.style.cssText = `
             position: fixed;
             bottom: 20px;
             right: 20px;
-            background: #28a745;
+            background: ${type === 'success' ? '#28a745' : '#dc3545'};
             color: white;
             padding: 10px 20px;
             border-radius: 5px;

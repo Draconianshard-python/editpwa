@@ -2,8 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="description" content="Self-editing Progressive Web App">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#000000">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -13,7 +12,6 @@
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
     <link rel="stylesheet" href="assets/css/style.css">
-    <!-- Add Monaco Editor -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs/loader.min.js"></script>
 </head>
 <body>
@@ -27,11 +25,10 @@
                 <div id="utc-time"></div>
             </div>
             
-            <nav id="file-nav">
-                <select id="file-selector">
-                    <option value="">Select a file to edit...</option>
-                </select>
-                <button id="saveButton" disabled>Save Changes</button>
+            <nav id="action-bar">
+                <button id="newFileBtn">New File</button>
+                <button id="saveButton" disabled>Save</button>
+                <button id="runButton" disabled>Run File</button>
                 <button id="installButton" style="display: none;">Install App</button>
             </nav>
         </header>
@@ -45,17 +42,43 @@
             </div>
             <div id="editor-container">
                 <div id="monaco-editor"></div>
+                <div id="output-container" style="display: none;">
+                    <div class="output-header">
+                        <span>Output</span>
+                        <button id="closeOutput">×</button>
+                    </div>
+                    <div id="output-content"></div>
+                </div>
             </div>
         </main>
 
         <footer>
             <div id="status-bar">
+                <span id="current-file"></span>
                 <span id="lastModified"></span>
-                <span id="file-info"></span>
             </div>
         </footer>
     </div>
 
+    <!-- New File Dialog -->
+    <div id="newFileDialog" class="dialog" style="display: none;">
+        <div class="dialog-content">
+            <h3>Create New File</h3>
+            <input type="text" id="newFileName" placeholder="Enter file name (e.g., script.js)">
+            <select id="fileTemplate">
+                <option value="">Empty File</option>
+                <option value="html">HTML Template</option>
+                <option value="js">JavaScript Template</option>
+                <option value="css">CSS Template</option>
+            </select>
+            <div class="dialog-buttons">
+                <button id="createFileBtn">Create</button>
+                <button id="cancelFileBtn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/js/fileTemplates.js"></script>
     <script src="assets/js/app.js" type="module"></script>
 </body>
 </html>
